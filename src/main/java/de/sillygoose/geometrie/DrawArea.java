@@ -1,6 +1,6 @@
 package de.sillygoose.geometrie;
 
-/**
+/*
  * Zeichenflaeche fuer geometrische Objekte;
  * verwaltet sowohl die Objektliste als
  * auch die Liste der selektierten Objekte
@@ -85,37 +85,37 @@ public class DrawArea extends JPanel implements MouseListener, MouseMotionListen
   }
 
   // Aufgabe 9
-  public void erstelleNeueStrecke(Color farbe)
+  public void createLine(Color color)
   {
 
   }
 
   // Aufgabe 10
-  public void erstelleNeuenKreis(Color farbe)
+  public void createCircle(Color color)
   {
 
   }
 
   // Aufgabe 11
-  public void erstelleNeuesPolygon(Color farbe)
+  public void createPolygon(Color color)
   {
 
   }
 
   // Aufgabe 12
-  public void erstelleNeuesRechteck(Color farbe)
+  public void createRect(Color color)
   {
 
   }
 
   // Aufgabe 13
-  public void aendereFarbeDerAusgewaehltenPunkte(Color neueFarbe)
+  public void changeColorForSelectedPoints(Color newColor)
   {
 
   }
 
   // Aufgabe 14
-  public void entferneAusgewaehltePunkte()
+  public void removeSelectedPoints()
   {
 
   }
