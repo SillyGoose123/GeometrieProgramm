@@ -54,11 +54,11 @@ public class GUI extends JFrame {
 
   private JPanel createFunctionGrid() {
     var container = new JPanel();
-    container.setLayout(new GridLayout(10, 1, 0 ,6));
+    container.setLayout(new GridLayout(10, 1, 0, 6));
     container.setBorder(new EmptyBorder(0, 6, 0, 6));
 
     var colorPreview = new JPanel();
-    colorPreview.setBackground(new Color(0,0,0));
+    colorPreview.setBackground(new Color(0, 0, 0));
 
 
     createButton(container, "Kreis", _ -> drawArea.createCircle(colorPreview.getBackground()));

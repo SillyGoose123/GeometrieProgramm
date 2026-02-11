@@ -2,10 +2,12 @@ package de.sillygoose.geometrie.drawables;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.List;
 
 public class Point extends Drawable {
   private int x;
   private int y;
+  private boolean isSelected = false;
 
   public Point(Color color, int x, int y) {
     super(color);
@@ -20,7 +22,17 @@ public class Point extends Drawable {
   @Override
   public void draw(Graphics gr) {
     gr.setColor(color);
-    gr.fillRect(x - 2, y -2, 4, 4);
+
+    if (isSelected) {
+      gr.drawRect(x - 2, y -2, 4, 4);
+    } else  {
+      gr.fillRect(x - 2, y -2, 4, 4);
+    }
+  }
+
+  @Override
+  public boolean dependsOn(final List<Point> selected) {
+    return false;
   }
 
   public int getX() {
@@ -37,5 +49,13 @@ public class Point extends Drawable {
 
   public void setY(int y) {
     this.y = y;
+  }
+
+  public boolean isSelected() {
+    return isSelected;
+  }
+
+  public void setSelected(boolean selected) {
+    isSelected = selected;
   }
 }

@@ -2,6 +2,7 @@ package de.sillygoose.geometrie.drawables;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.List;
 
 public class Line extends Drawable {
   private final Point a;
@@ -15,7 +16,12 @@ public class Line extends Drawable {
 
   @Override
   public void draw(Graphics gr) {
-    //TODO
     gr.setColor(color);
+    gr.drawLine(a.getX(), a.getY(), b.getX(), b.getY());
+  }
+
+  @Override
+  public boolean dependsOn(final List<Point> selected) {
+    return selected.contains(a) || selected.contains(b);
   }
 }
