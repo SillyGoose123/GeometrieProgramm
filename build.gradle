@@ -27,4 +27,6 @@ test {
 
 application {
     mainClass = 'de.sillygoose.geometrie.Main'
+    //to prevent a ok warning from flatlaf
+    applicationDefaultJvmArgs = ["--enable-native-access=ALL-UNNAMED"]
 }
