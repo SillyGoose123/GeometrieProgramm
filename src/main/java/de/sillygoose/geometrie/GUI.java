@@ -1,5 +1,6 @@
 package de.sillygoose.geometrie;
 
+import com.formdev.flatlaf.icons.FlatOptionPaneWarningIcon;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -17,7 +18,9 @@ import javax.swing.border.EmptyBorder;
  */
 
 public class GUI extends JFrame {
-  private final DrawArea drawArea = new DrawArea();
+  private final JToggleButton selectionToggle = new JToggleButton("Auswählen");
+  private final JToggleButton fillToggle = new JToggleButton("Füllen");
+  private final DrawArea drawArea = new DrawArea(selectionToggle, fillToggle);
 
   public GUI(String title) {
     // Frame-Initialisierung
@@ -54,12 +57,18 @@ public class GUI extends JFrame {
 
   private JPanel createFunctionGrid() {
     var container = new JPanel();
-    container.setLayout(new GridLayout(10, 1, 0, 6));
+    container.setLayout(new GridLayout(13, 1, 0, 6));
     container.setBorder(new EmptyBorder(0, 6, 0, 6));
 
     var colorPreview = new JPanel();
     colorPreview.setBackground(new Color(0, 0, 0));
 
+    //selection mode
+    selectionToggle.addActionListener(_ -> {
+      selectionToggle.setText(selectionToggle.isSelected() ? "Auswählen Beenden" : "Auswählen");
+      if(!selectionToggle.isSelected()) drawArea.repaint();
+    });
+    container.add(selectionToggle);
 
     createButton(container, "Kreis", _ -> drawArea.createCircle(colorPreview.getBackground()));
     createButton(container, "Rechteck", _ -> drawArea.createRect(colorPreview.getBackground()));
@@ -69,10 +78,32 @@ public class GUI extends JFrame {
     container.add(colorPreview);
     createColorSliders(container, colorPreview);
 
-    createButton(container, "Löschen", _ -> drawArea.removeSelectedPoints());
+    fillToggle.addActionListener(_ -> fillToggle.setText(fillToggle.isSelected() ? "Füllen Beenden" : "Füllen"));
+    container.add(fillToggle);
+
+    createButton(container, "Punkte Löschen", _ -> drawArea.removeSelectedPoints());
     createButton(container, "Punkte faerben", _ -> drawArea.changeColorForSelectedPoints(colorPreview.getBackground()));
+    createButton(container, "Clear", _ -> askClear());
 
     return container;
+  }
+
+  private void askClear() {
+    var result = JOptionPane.showOptionDialog(
+        getContentPane(),
+        "Sicher das sie alles löschen wollen!",
+        "Clear?",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE,
+        new FlatOptionPaneWarningIcon(),
+        null,
+        null
+
+    );
+    if(result == JOptionPane.YES_OPTION) {
+      drawArea.clear();
+      drawArea.repaint();
+    }
   }
 
 

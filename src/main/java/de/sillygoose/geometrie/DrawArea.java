@@ -13,18 +13,21 @@ package de.sillygoose.geometrie;
  * @author Tobias Nopper
  */
 
+import de.sillygoose.geometrie.drawables.Circle;
 import de.sillygoose.geometrie.drawables.Drawable;
 import de.sillygoose.geometrie.drawables.Line;
 import de.sillygoose.geometrie.drawables.Point;
+import de.sillygoose.geometrie.drawables.Polygon;
+import de.sillygoose.geometrie.drawables.Rect;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.swing.AbstractAction;
@@ -34,15 +37,19 @@ import javax.swing.JPanel;
 import java.util.Optional;
 
 import java.util.ArrayList;
+import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 
 public class DrawArea extends JPanel implements MouseListener, MouseMotionListener {
   private final ArrayList<Drawable> drawables = new ArrayList<>();
+  private final JToggleButton selectionToggle;
+  private final JToggleButton fillToggle;
   private Point dragPoint;
-  private boolean selectionMode = false; //TODO: FULLY IMPLEMENT SELECTION SWITCH (GUI DISPLAY??)
 
-  public DrawArea() {
+  public DrawArea(final JToggleButton selectionToggle, final JToggleButton fillToggle) {
     super();
+    this.selectionToggle = selectionToggle;
+    this.fillToggle = fillToggle;
     addMouseListener(this);
     addMouseMotionListener(this);
     setupKeyBindings();
@@ -52,6 +59,10 @@ public class DrawArea extends JPanel implements MouseListener, MouseMotionListen
   @Override
   public void paint(Graphics gr) {
     super.paint(gr);
+
+    if(!selectionToggle.isSelected()) {
+      getSelected().forEach(point -> point.setSelected(false));
+    }
 
     for (var zo : drawables) {
       zo.draw(gr);
@@ -70,12 +81,11 @@ public class DrawArea extends JPanel implements MouseListener, MouseMotionListen
     }
 
     dragPoint = point.get();
-    dragPoint.setSelected(!dragPoint.isSelected());
+    dragPoint.setSelected(!dragPoint.isSelected() && selectionToggle.isSelected());
     repaint();
   }
 
   public void mouseReleased(MouseEvent e) {
-    dragPoint.setSelected(dragPoint.isSelected() && (e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) > 0);
     dragPoint = null;
     repaint();
   }
@@ -89,41 +99,26 @@ public class DrawArea extends JPanel implements MouseListener, MouseMotionListen
     repaint();
   }
 
-  // Aufgabe 9
   public void createLine(Color color) {
-    var selected = getSelected();
-    var size = selected.size();
-    if (size < 2) {
-      showWarning("Zu wenig Punkte ausgewählt 2 sind nötig!");
-      return;
-    }
-
-    drawables.add(new Line(color, selected.get(size - 2), selected.getLast()));
-    repaint();
+    createDrawable(2, points -> new Line(color, points.getFirst(), points.get(1)));
   }
 
-  // Aufgabe 10
   public void createCircle(Color color) {
-
+    createDrawable(2, points -> new Circle(color, points.getFirst(), points.get(1)));
   }
 
-  // Aufgabe 11
   public void createPolygon(Color color) {
-
+    createDrawable(1, points -> new Polygon(color, fillToggle.isSelected(), points));
   }
 
-  // Aufgabe 12
   public void createRect(Color color) {
-
+      createDrawable(2, points -> new Rect(color, fillToggle.isSelected(), points.getFirst(), points.get(1)));
   }
 
-  // Aufgabe 13
   public void changeColorForSelectedPoints(Color newColor) {
-    getSelected().forEach(point -> point.setColor(newColor));
-    repaint();
+    getSelected().forEach(point -> point.setColor(newColor, getGraphics()));
   }
 
-  // Aufgabe 14
   public void removeSelectedPoints() {
     var selected = getSelected();
     //check dependencies of points
@@ -132,6 +127,12 @@ public class DrawArea extends JPanel implements MouseListener, MouseMotionListen
     repaint();
   }
 
+  public void clear() {
+    drawables.clear();
+    repaint();
+  }
+
+  /* UTILITIES */
   private Stream<Point> filterPoints(Predicate<Point> pointPredicate) {
     return drawables.stream()
         .filter((Drawable obj) -> obj instanceof Point)
@@ -154,24 +155,54 @@ public class DrawArea extends JPanel implements MouseListener, MouseMotionListen
 
   private void setupKeyBindings() {
     //Shift release
-    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SHIFT"), "onShiftRelease");
-    getActionMap().put("onShiftRelease", new AbstractAction() {
+    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SHIFT"), "onShift");
+    getActionMap().put("onShift", new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        getSelected().forEach(point -> point.setSelected(false));
-        repaint();
+        selectionToggle();
       }
     });
 
     //Remove points selected
-    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK), "onDelete");
+    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "onDelete");
     getActionMap().put("onDelete", new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        selectionMode = !selectionMode;
+        removeSelectedPoints();
       }
     });
 
+    //fill
+    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released F"), "onFill");
+    getActionMap().put("onFill", new AbstractAction() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        var updated = !fillToggle.isSelected();
+        fillToggle.setSelected(updated);
+        fillToggle.setText(updated ? "Füllen Beenden" : "Füllen");
+        repaint();
+      }
+    });
+  }
+
+  private void createDrawable(final int length, Function<List<Point>, Drawable> constructor) {
+    var selected = getSelected();
+    var size = selected.size();
+    if (size < length) {
+      showWarning("Zu wenig Punkte ausgewählt " + length + " sind nötig!");
+      return;
+    }
+
+    drawables.add(constructor.apply(selected.reversed()));
+    selectionToggle();
+    repaint();
+  }
+
+  private void selectionToggle() {
+    var updated = !selectionToggle.isSelected();
+    selectionToggle.setSelected(updated);
+    selectionToggle.setText(updated ? "Auswählen Beenden" : "Auswählen");
+    repaint();
   }
 
   // Bitte weitergehen, hier gibt es nichts zu sehen...
