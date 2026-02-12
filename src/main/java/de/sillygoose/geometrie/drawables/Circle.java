@@ -8,7 +8,7 @@ public class Circle extends Drawable {
   private final Point center;
   private final Point radius;
 
-  public Circle(Color color, Point center, Point radius) {
+  public Circle(final Color color, final Point center, final Point radius) {
     super(color);
     this.center = center;
     this.radius = radius;
@@ -17,7 +17,12 @@ public class Circle extends Drawable {
 
   @Override
   public void draw(Graphics gr) {
+    radius.setColor(Color.BLUE, gr);
+    center.setColor(Color.RED, gr);
+
     gr.setColor(color);
+    var rad = center.abstandZu(radius.getX(), radius.getY());
+    gr.drawOval(center.getX() - rad, center.getY() - rad, rad * 2, rad * 2);
   }
 
   @Override

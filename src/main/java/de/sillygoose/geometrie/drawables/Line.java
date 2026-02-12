@@ -8,7 +8,7 @@ public class Line extends Drawable {
   private final Point a;
   private final Point b;
 
-  public Line(Color color, Point a, Point b)  {
+  public Line(final Color color, final Point a, final Point b)  {
     super(color);
     this.a = a;
     this.b = b;
