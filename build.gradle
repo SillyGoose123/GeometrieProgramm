@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'de.sillygoose.geometrie'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 
 repositories {
     mavenCentral()
@@ -29,4 +29,16 @@ application {
     mainClass = 'de.sillygoose.geometrie.Main'
     //to prevent a ok warning from flatlaf
     applicationDefaultJvmArgs = ["--enable-native-access=ALL-UNNAMED"]
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass
+        )
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
