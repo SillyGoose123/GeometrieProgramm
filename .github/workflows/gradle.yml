@@ -25,7 +25,7 @@ jobs:
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
       - name: Build jar with Gradle Wrapper
-        run: ./gradlew jar
+        run: chmod +x ./gradlew.jar && ./gradlew jar
 
       - name: Get project version
         id: get_version
