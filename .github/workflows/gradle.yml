@@ -29,13 +29,13 @@ jobs:
 
       - name: Get project version
         id: get_version
-        run: export PROJ_VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
+        run: echo PROJ_VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}') >> $GITHUB_ENV
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v$PROJ_VERSION
-          files: ./build/libs/Geometrie-$PROJ_VERSION.jar
+          tag_name: v${{env.PROJ_VERSION}}
+          files: ./build/libs/Geometrie-${{env.PROJ_VERSION}}.jar
 
   dependency-submission:
     runs-on: ubuntu-latest
