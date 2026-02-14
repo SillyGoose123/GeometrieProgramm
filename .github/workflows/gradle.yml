@@ -6,16 +6,13 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: write
-  packages: write
-
 jobs:
   build-and-upload:
     name: Build and Upload Binary
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
